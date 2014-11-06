@@ -1,0 +1,34 @@
+
+
+class Request { //abstract class
+public:
+	Request(){};
+	virtual ~IRequest()=0;
+	virtual ;
+	Action getAction() { return action; } //Action should be enum
+	String getObjName() { return objName; }
+//	void setAction(Action action) { this->action = action; }
+//	void setObjName(String objName) {
+	
+private:
+	Action action;
+	String objName;
+}
+
+
+class InfoRequest: public IRequest {
+public:
+	
+}
+
+class NameReques: public Request {}
+
+class IdxInfoRequest: public Request {}
+
+class TbInfoRequest: public Request {}
+
+class FromRequest: public Request {}
+
+class ConditionReqeust: public Request {}
+
+class InsertRequest: public Request {}

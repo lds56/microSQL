@@ -1,0 +1,20 @@
+#include <boost/smart_ptr.hpp>
+#include <iostream>
+using namespace std;
+using namespace boost;
+
+typedef shared_ptr<Table> TablePtr;
+typedef share_ptr<Index> IndexPtr;
+
+
+class CatalogManager {
+public:
+	bool existsTable(String tableName);
+  //  vector<TablePtr> getTable();
+	vector<F
+  
+private:
+	int fieldCount;
+	int indexCount;
+  
+}
