@@ -1,0 +1,7 @@
+#include<string>
+
+typedef shared_ptr<Table> TablePtr;
+
+class Table{
+	
+}
