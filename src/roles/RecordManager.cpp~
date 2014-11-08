@@ -1,0 +1,67 @@
+#include"models/RecordManager.h"
+#include<fstream.h>
+
+using namespace std;
+
+class RecordManager {
+public:
+	bool createTable(string tableName) {
+		ofstream file("data/" + tableName + ".table");
+		file.close();
+	}
+	
+	bool dropTable(string tableName) {
+		int ret_code = remove("data/" + tableName + ".table");
+		if (ret_code == 0) {
+			cout << "File was successfully deleted\n";
+		} else {
+			cerr << "Error during the deletion: " << ret_code << '\n';
+		}
+	}
+	
+	vector<map<string, string>> select(vector<string> fields, string tableName) {
+		select(vector<string> fields, string tableName, new Condition("true"));
+	}
+	
+	//ensure fields!! 
+	//vector<map<string, string>> select(string tableName, Condition cond) {
+	//	select()
+	//}
+	
+	vector<map<string, string>> select(vector<string> fields, string tableName, Conditon cond) {
+		TablePtr tPtr = getTablePtr(tableName);                                   
+        Vector<map<string, string>> aVector = new vector<TableRowPtr>;    
+        TableRowPtr rPtr( new TableRow(tPtr->getHeadAddr(), tPtr->getRowSize()) );
+		do {
+			if (cond.check(rPtr) && !rPtr->isBlank()) aVector.push_back(rPtr.toMap(fields)); 
+			rPtr = rPtr->next();
+		} while (!tPtr->isTail(rPtr));
+		return aVector;
+	}
+	
+	bool insert(string tableName, vector<string> data) {
+		TablePtr tPtr = getTablePtr(tableName);
+		if (tPtr->noBlank()) 
+			TableRow tRow = new TableRow(tPtr->getTailAddr(), tPtr->getRowSize());
+		else {
+			TableRowPtr rPtr = tPtr->getBlankRow();
+			rPtr->setBlank(false);
+			rPtr->setData(data);
+		}
+	}
+	
+	bool delete(string tableName) {
+		delete(tableName, new Conditon("true"));
+	}
+	
+	bool delete(string tableName, Conditon cond){
+		TablePtr tPtr = getTablePtr(tableName);
+		TableRowPtr rPtr( new TableRow(tPtr->getHeadAddr(), tPtr->getRowSize()) );
+		do {
+			if (!rPtr->isBlank() && cond.check(rPtr)) {
+				rPtr.setBlank(true);
+			}
+			rPtr = rPtr->next()      
+		} while (!tPtr->isTail(rPtr));
+	}
+}

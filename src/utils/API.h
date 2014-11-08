@@ -5,9 +5,9 @@ using namespace std;
 
 class API{
 public:
-	void createTable(InfoRequest request);
+	void createTable(TbInfoRequest request);
 	void dropTable(NameRequest reqeust);
-	void createIndex(Request request);
+	void createIndex(IdxInfoRequest request);
 	void dropIndex(NameRequest request);
 	void select(FromRequest request);
 	void select(ConditionReqeust request);

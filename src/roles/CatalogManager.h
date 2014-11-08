@@ -1,10 +1,12 @@
 #include <boost/smart_ptr.hpp>
 #include <iostream>
+#include "models/Table.h"
+#include "models/Index.h"
 using namespace std;
 using namespace boost;
 
-typedef shared_ptr<Table> TablePtr;
-typedef share_ptr<Index> IndexPtr;
+//typedef shared_ptr<Table> TablePtr;
+//typedef shared_ptr<Index> IndexPtr;
 
 
 class CatalogManager {

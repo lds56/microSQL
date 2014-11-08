@@ -1,9 +1,0 @@
-#include<string>
-
-typedef shared_ptr<Table> TablePtr;
-
-class Table{
-public:
-	Table(string tableName, );
-	get
-}

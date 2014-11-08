@@ -4,15 +4,16 @@
 #include<map>
 
 using namespace std;
-
 class RecordManager {
 public:
-	bool createTable(TableName tableName, map<string, FieldType> tableInfo);
-	bool dropTable(TableName tableName);
-	vector<TableRowPtr> select(TableName tableName, vector<Condition> conditions);
-	vector<TableRowPtr> select(vector<Address> addresses);
-	Address insert(TableName tableName, vector<String> data);
-	int delete(TableName tableName, vector<Condition> conditions);
-	int delete(vector<Address> addresses);  //Buffer manager?
-
+	bool createTable(string tableName);   //create file: *.table
+	bool dropTable(string tableName);  //delete file: *.table
+	vector<TableRowPtr> select(string tableName);
+	vector<TableRowPtr> select(string tableName, Condition cond);
+//	vector<TableRowPtr> select(vector<Address> addresses);
+	bool insert(string tableName, vector<String> data);
+	bool delete(string tableName);
+	bool delete(string tableName, Condtion cond);
+	//int delete(vector<Address> addresses); 
 }
+
