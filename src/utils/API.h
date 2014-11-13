@@ -1,5 +1,6 @@
-#include <vector.h>
-#include <string.h>
+#include <vector>
+#include <string>
+#include "utils/Request.h"
 
 using namespace std;
 
@@ -12,7 +13,7 @@ public:
 	void select(FromRequest request);
 	void select(ConditionReqeust request);
 	void insert(InsertRequest reqeust);
-	void delete(FromRequest reqeuse);
-	void delete(ConditionReqeust requset);
+	void del(FromRequest reqeuse);
+	void del(ConditionReqeust requset);
 	
-}
+};

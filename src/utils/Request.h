@@ -1,4 +1,11 @@
+#include <string>
+#include
 
+using namespace std;
+
+enum Action {
+
+};
 
 class Request { //abstract class
 public:
@@ -9,14 +16,14 @@ public:
 	virtual ~IRequest()=0;
 	virtual ;
 	Action getAction() { return action; } //Action should be enum
-	String getObjName() { return objName; }
+	string getObjName() { return objName; }
 //	void setAction(Action action) { this->action = action; }
 //	void setObjName(String objName) {
 	
 private:
 	Action action;
-	String objName;
-}
+	string objName;
+};
 
 
 class TbInfoRequest: public Request {
@@ -28,21 +35,22 @@ public:
 	}
 	map<string,FieldType> getAttri() { return attri; }
 	string getPrimaryKey() { return primaryKey; }
+
 private:
-	map<String, FieldType> attri;
+	map<string, FieldType> attri;
 	string primaryKey;
-}
+};
 
 class NameRequest: public Request {
 public:
 	NameRequest(Action action, string objName) {
 		Request(action, objName);
 	}
-}
+};
 
 class IdxInfoRequest: public Request {
 public:
-	IdxInfoRequest(Action action, string objName, string tableName, strinf=g field) {
+	IdxInfoRequest(Action action, string objName, string tableName, string field) {
 		Request(action, objName);
 		this->tableName = tableName;
 		this->field = field;
@@ -53,7 +61,7 @@ public:
 private:
 	string tableName;
 	string field;
-}
+};
 
 
 class FromRequest: public Request {
@@ -66,12 +74,12 @@ public:
 
 private:
 	string fromTable;
-}
+};
 
 class ConditionReqeust: public FromRequest {
 public:
 	ConditionReqeust(Action action, string objName, string FromRequest, vector<
 					 
-}
+};
 
-class InsertRequest: public Request {}
+class InsertRequest: public Request {};

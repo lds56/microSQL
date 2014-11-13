@@ -1,10 +1,19 @@
-
+#include "models/Address.h"
+#include <string>
+#include <models/Buffer.h>
 
 class BufferManager {
 public:
-	unsigned char[] read(Address address);
-	bool write(Address address, unsigned char[] data);
-	Address findFree(String tableName);
-	Block readFromFile(string fileName, int offset);
-	bool writeToFile(string fileName, int offset, Block block);
-}
+    void load(string tableName);
+    Address getHeadAddr(string tableName);
+    Address getTailAddr(string tableName);
+	static char* read(Address address);
+	static bool write(Address address, char data[]);
+	static Address findFree(string tableName);
+	static Block readFromFile(string fileName, int offset);
+	static bool writeToFile(string fileName, int offset, Block block);
+
+private:
+
+    static Buffer buffer;
+};

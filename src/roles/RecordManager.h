@@ -1,9 +1,14 @@
+#ifndef RECORDMANAGER_H_
+#define RECORDMANAGER_H_
+
 #include<vector>
 #include<string>
 #include"models/table.h"
+#include"models/Condition.h"
 #include<map>
 
 using namespace std;
+
 class RecordManager {
 public:
 	bool createTable(string tableName);   //create file: *.table
@@ -11,9 +16,11 @@ public:
 	vector<TableRowPtr> select(string tableName);
 	vector<TableRowPtr> select(string tableName, Condition cond);
 //	vector<TableRowPtr> select(vector<Address> addresses);
-	bool insert(string tableName, vector<String> data);
-	bool delete(string tableName);
-	bool delete(string tableName, Condtion cond);
+	bool insert(string tableName, vector<string> data);
+    bool del(string tableName);
+    //bool delete(string tableName);
+    bool del(string tableName, Condition cond);
 	//int delete(vector<Address> addresses); 
-}
+};
 
+#endif
