@@ -41,7 +41,7 @@ Address BufferManager::getTailAddr() {
 }
 
 Block& BufferManager::readFromFile(Address address) {
-    char * buffer = new char(Block::size);
+    char* buffer = new char(Block::size);
     //int blockNum = address.getOffset()*tableInfo.rowSize / Block::size;{
     int startOffset = (address.getOffset() / howManyRows * howManyRows);
     Address startAddress = Address(address.getfileName(), startOffset);
@@ -70,6 +70,7 @@ Block& BufferManager::readFromFile(Address address) {
     }
     blocks[leastIndex] = Block(string(buffer), startAddress);
     //cout << blocks[leastIndex].pickAllData() << endl;
+    delete[] buffer;
     return (blocks[leastIndex]);
 }
 
@@ -93,13 +94,13 @@ bool BufferManager::writeToFile(Address address, string data) {
 Block& BufferManager::findBlock(Address address, bool readFlag) { //read?true, false
     int no = -1;
     for (int i=0; i<blocks.size(); i++)
-        if (blocks[i].contains(address)) {
+        if (blocks[i].contains(address, tableInfo.rowSize)) {
             no = i;  //hit
             //if (readFlag && blocks[i].isDirty()) {
             //    writeToFile(address, blocks[i]);
             //}
         }
-    //if (!readFlag) cout << no << endl;
+    //cout << no << endl;
     if (no == -1) return readFromFile(address);   //miss
     else return blocks[no];
 }
@@ -120,7 +121,7 @@ bool BufferManager::write(Address address, string data) {
 void BufferManager::printBlocks() {
     //cout << "print!" << endl;
     for (int i=0; i<blocks.size(); i++)
-        if (blocks[i].pickAllData().size()>1) {
+        if (blocks[i].getUsed() != 0) {
             cout << i << ": " << blocks[i].getStartAddress().getOffset() << " " ;
             cout << blocks[i].pickAllData() << " " ;
             cout << blocks[i].isDirty() << endl;

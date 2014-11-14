@@ -13,7 +13,7 @@ using namespace std;
 class Block {
 public:
     Block() {
-        this->used = clock();
+        this->used = 0;
         this->data = string("");
         //strcpy(this->data, "");
         //Address* nullAddr = NULL;
@@ -52,13 +52,13 @@ public:
         return data.substr(start, len);
     }
 
-    string pickAllData() {
+    string& pickAllData() {
         return data;
     }
 
-    bool contains(Address address) {
+    bool contains(Address address, int rowSize) {
         return (startAddr.getfileName() == address.getfileName() &&
-                startAddr.getOffset() <= address.getOffset() && address.getOffset() < startAddr.getOffset()+size );
+                startAddr.getOffset() <= address.getOffset() && address.getOffset() < startAddr.getOffset()+rowSize );
     }
 
     static int size;
