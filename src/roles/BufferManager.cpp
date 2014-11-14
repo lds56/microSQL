@@ -24,7 +24,10 @@ BufferManager::BufferManager(TableInfo tableInfo){
 }
 
 BufferManager::~BufferManager() {
+    fseek(fp, 0, SEEK_END);
     fclose(fp);
+    //delete fp;
+    //int i = 10;
 }
 
 void BufferManager::initBlocks(int num) {
@@ -59,7 +62,8 @@ Block& BufferManager::readFromFile(Address address) {
     clock_t leastUsed = blocks[0].getUsed();
     int leastIndex = 0;
     for (int i=1; i<blocks.size(); i++) {
-        if (leastUsed < blocks[i].getUsed()) {   //used maximum
+        //cout << blocks[i].getUsed() << endl;
+        if (leastUsed > blocks[i].getUsed()) {   //used min
             leastUsed = blocks[i].getUsed();
             leastIndex  = i;
         }
@@ -100,7 +104,7 @@ Block& BufferManager::findBlock(Address address, bool readFlag) { //read?true, f
             //    writeToFile(address, blocks[i]);
             //}
         }
-    //cout << no << endl;
+    cout << no << endl;
     if (no == -1) return readFromFile(address);   //miss
     else return blocks[no];
 }
@@ -124,7 +128,8 @@ void BufferManager::printBlocks() {
         if (blocks[i].getUsed() != 0) {
             cout << i << ": " << blocks[i].getStartAddress().getOffset() << " " ;
             cout << blocks[i].pickAllData() << " " ;
-            cout << blocks[i].isDirty() << endl;
+            cout << blocks[i].isDirty() << " ";
+            cout << blocks[i].getUsed() << endl;
         }
 }
 

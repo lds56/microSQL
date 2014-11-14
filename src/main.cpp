@@ -19,6 +19,7 @@ int main() {
     //cout << bufferManager.getTailAddr().getOffset() << endl;
     cout << bufferManager.read(Address("test", 4)) << endl; bufferManager.printBlocks();
 
+/*
     bufferManager.write(Address("test", 4), string("390000ldx9")); bufferManager.printBlocks();
 
     cout << bufferManager.read(Address("test", 4)) << endl; bufferManager.printBlocks();
@@ -32,6 +33,8 @@ int main() {
     bufferManager.write(Address("test", 10), string("420000ld10")); bufferManager.printBlocks();
 
     cout << bufferManager.read(Address("test", 3)) << endl; bufferManager.printBlocks();
+
+*/
 
     //cout << bufferManager.read(Address("test", 3)) << endl; bufferManager.printBlocks();
 

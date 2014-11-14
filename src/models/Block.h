@@ -43,6 +43,7 @@ public:
         //for (int i=0; i<len; i++) data[i+start] = newData[i];
         data.replace(start, len, newData);
         dirty = true;
+        used = clock();
     }
 
     string pickData(int start, int len) {
