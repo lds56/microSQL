@@ -21,10 +21,10 @@ struct Field {
 
 struct TableInfo {
 	string tableName;   // Table name
-	int blockNum;	// Block number of table data in the file
+	int rowSize;	// Block number of table data in the file
 	int fieldNum;	// Number of fields in the table
 	int totalLength;	// Length of one record which equals to sum(fieldLfength)
-	vector<Field> fields;  // Vector used to store all field
+	vector<string> fields;  // Vector used to store all field
 };
 
 

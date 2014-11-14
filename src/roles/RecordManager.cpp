@@ -60,17 +60,17 @@ bool RecordManager::insert(string tableName, vector<string> data) {
 }
 	
 bool RecordManager::del(string tableName) {
-	delete(tableName, Conditon("true"));
+	delete(tableName, Condition("true"));
 }
 
-bool RecordManager::del(string tableName, Conditon cond){
-	TablaePtr tPtr(new Table(tableName));
+bool RecordManager::del(string tableName, Condition cond){
+	TablePtr tPtr(new Table(tableName));
 	TableRowPtr rPtr = tPtr.getHead();
 //TableRowPtr rPtr( new TableRow(tPtr->getHeadAddr(), tPtr->getRowSize()) );
 	do {
 		if (!rPtr->isBlank() && cond.check(rPtr)) {
 			rPtr->setBlank(true);
 		}
-		rPtr = rPtr->next()      
+		rPtr = rPtr->next();
 	} while (!tPtr->isTail(rPtr));
 }
