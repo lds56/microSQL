@@ -1,9 +1,10 @@
-#include <roles/BufferManager.h>
+#include "roles/BufferManager.h"
 #include <iostream>
 #include <string>
 #include <vector>
 #include <models/Block.h>
-#include <roles/RecordManager.h>
+#include "roles/RecordManager.h"
+#include "models/Condition.h"
 #include "models/tableRow.h"
 
 using namespace std;
@@ -24,14 +25,23 @@ int main() {
     BufferManager::status = "DISABLE";
     BufferManager::initBlocks(3);
 
-
+    Condition cond1 = Condition(Comparison::gt, string("330000"), 0);
+    Condition cond2 = Condition(Comparison::lt, string("370000"), 0);
+    vector<Condition> conds = vector<Condition> ();
+    conds.push_back(cond1); conds.push_back(cond2);
     RecordManager recordManager = RecordManager();
-    vector<TableRowPtr> v = recordManager.select(tb);
-    cout << v.size() << endl;
-    for (int i=0; i<v.size(); i++) {
-        cout << v[i]->getValues()[0] << endl;
-        cout << v[i]->getValues()[1] << endl;
-    }
+    recordManager.del(tb, conds);
+    vector<string> v = vector<string>();
+    v.push_back(string("990000newx"));
+    recordManager.insert(tb, v);
+    vector<string> v2 = vector<string>();
+    v2.push_back(string("999000Ne2x"));
+    recordManager.insert(tb, v2);
+//    cout << v.size() << endl;
+//    for (int i=0; i<v.size(); i++) {
+//        cout << v[i]->getValues()[0] << endl;
+//        cout << v[i]->getValues()[1] << endl;
+//    }
 
     //vector<string> v = vector<string>();
     //v.push_back(string("900000new9"));

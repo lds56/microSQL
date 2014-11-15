@@ -14,12 +14,12 @@ public:
 	bool createTable(TableInfo tableInfo);   //create file: *.table
 	bool dropTable(TableInfo tableInfo);  //delete file: *.table
 	vector<TableRowPtr> select(TableInfo tableInfo);
-	vector<TableRowPtr> select(TableInfo tableInfo, Condition cond);
+	vector<TableRowPtr> select(TableInfo tableInfo, vector<Condition> conds);
 //	vector<TableRowPtr> select(vector<Address> addresses);
 	bool insert(TableInfo tableInfo, vector<string> data);
     bool del(TableInfo tableInfo);
     //bool delete(string tableName);
-    bool del(TableInfo tableInfo, Condition cond);
+    bool del(TableInfo tableInfo, vector<Condition> conds);
 	//int delete(vector<Address> addresses); 
 };
 

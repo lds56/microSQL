@@ -27,17 +27,30 @@ bool RecordManager::dropTable(  TableInfo tableInfo) {
 }
 	
 vector<TableRowPtr> RecordManager::select(TableInfo tableInfo) {
-	return select(tableInfo, Condition("true"));
+    vector<Condition> conds = vector<Condition> ();
+    conds.push_back(Condition(true));
+	return select(tableInfo, conds);
 }
 	
-vector<TableRowPtr> RecordManager::select(TableInfo tableInfo, Condition cond) {
+vector<TableRowPtr> RecordManager::select(TableInfo tableInfo, vector<Condition> conds) {
 		TablePtr tPtr(new Table(tableInfo));
         vector<TableRowPtr> aVector;
 		TableRowPtr rPtr = tPtr->getHead();
         //cout << rPtr->getAddr().getOffset() << endl;
 //        TableRowPtr rPtr( new TableRow(tPtr->getHeadAddr(), tPtr->getRowSize()) );
         while (true) {
-			if (cond.check(rPtr) && !rPtr->isBlank()) aVector.push_back(rPtr);
+            if (!rPtr->isBlank()) {
+                //cout << rPtr->getValues()[0] << endl;
+                bool chosen = true;
+                for (int i = 0; i < conds.size(); i++) {
+                    int k = conds[i].getKthAttri();
+                    if (!conds[i].check(rPtr->getValues()[k])) {
+                        chosen = false;
+                        break;
+                    }
+                }
+                if (chosen) aVector.push_back(rPtr);
+            }
             //cout << rPtr->getAddr().getOffset() << endl;
             if (tPtr->isTail(rPtr)) break;
 			rPtr = tPtr->getNext(rPtr);
@@ -54,22 +67,38 @@ bool RecordManager::insert(TableInfo tableInfo, vector<string> data) {
 //TableRow tRow = new TableRow(tPtr->getTailAddr(), tPtr->getRowSize());
 		else {
 			TableRowPtr rPtr = tPtr->getBlankRow();
+            tPtr->popBlank();
+            cout << rPtr->getAddr().getOffset() << endl;
             tPtr->fillBlank(rPtr, data);
 		}
     return true;
 }
 	
 bool RecordManager::del(TableInfo tableInfo) {
-	return del(tableInfo, Condition("true"));
+    vector<Condition> conds = vector<Condition> ();
+    conds.push_back(Condition(true));
+	return del(tableInfo, conds);
 }
 
-bool RecordManager::del(TableInfo tableInfo, Condition cond){
+bool RecordManager::del(TableInfo tableInfo, vector<Condition> conds){
 	TablePtr tPtr(new Table(tableInfo));
 	TableRowPtr rPtr = tPtr->getHead();
 //TableRowPtr rPtr( new TableRow(tPtr->getHeadAddr(), tPtr->getRowSize()) );
     while (true) {
-		if (!rPtr->isBlank() && cond.check(rPtr)) {
-			rPtr->setBlank(true);
+		if (!rPtr->isBlank()) {
+            bool chosen = true;
+            for (int i=0; i<conds.size(); i++) {
+                int k = conds[i].getKthAttri();
+                if (!conds[i].check(rPtr->getValues()[k])) {
+                    chosen = false;
+                    break;
+                }
+            }
+            //cout << chosen << endl;
+            if (chosen) {
+                rPtr->setBlank(true);
+                tPtr->pushBlank(rPtr);
+            }
 		}
         if (tPtr->isTail(rPtr)) break;
 		rPtr = tPtr->getNext(rPtr);

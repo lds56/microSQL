@@ -8,6 +8,7 @@
 #include"roles/BufferManager.h"
 #include"models/TableInfo.h"
 #include<memory>
+#include <map>
 
 using namespace std;
 
@@ -23,7 +24,12 @@ public:
 		tailAddr = bufferManager.getTailAddr();
         //cout << "tail" << tailAddr.getOffset() << endl;
         //cout << "tail" << bufferManager.read(tailAddr) << endl;
-        blankQueue = queue<TableRowPtr>();
+
+        if (blanksMap.count(tableInfo.tableName)==0) {
+            queue<TableRowPtr> blankQueue = queue<TableRowPtr> ();
+            blanksMap[tableInfo.tableName] = blankQueue;
+            //blanksMap.insert( map<string, queue<TableRowPtr>::value_type(tableInfo.tableName, blankQueue) );
+        }
 	}
 	TableRowPtr getHead() {
         vector<string> data = byteTo(bufferManager.read(headAddr));
@@ -41,9 +47,10 @@ public:
 	bool isTail(TableRowPtr rPtr) {
         return rPtr->getAddr().equalsTo(tailAddr);
     }
-	TableRowPtr getBlankRow() { return blankQueue.front(); }
-	void popBlank() { blankQueue.pop(); }
-	bool noBlank() { return blankQueue.empty(); }
+	TableRowPtr getBlankRow() { return blanksMap[tableInfo.tableName].front(); }
+	void popBlank() { blanksMap[tableInfo.tableName].pop(); }
+    void pushBlank(TableRowPtr rPtr) { blanksMap[tableInfo.tableName].push(rPtr); }
+	bool noBlank() { return blanksMap[tableInfo.tableName].empty(); }
 	string toByte(vector<string> data) {
 		string rowString = "";
 		for (int i=0; i<data.size(); i++) {
@@ -75,7 +82,8 @@ private:
     TableInfo tableInfo;
     BufferManager bufferManager;
 	int rowSize;
-	queue<TableRowPtr> blankQueue;
+    //shared_ptr<queue<TableRowPtr>> blankQueuePtr;
+	static map<string, queue<TableRowPtr>> blanksMap;
 	Address headAddr;
 	Address tailAddr;
 };
