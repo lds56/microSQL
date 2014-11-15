@@ -1,7 +1,10 @@
 #include <roles/BufferManager.h>
 #include <iostream>
 #include <string>
+#include <vector>
 #include <models/Block.h>
+#include <roles/RecordManager.h>
+#include "models/tableRow.h"
 
 using namespace std;
 
@@ -9,19 +12,39 @@ int main() {
     TableInfo tb;
     tb.rowSize = 10;
     tb.fieldNum = 2;
-    tb.fields.push_back("id");
-    tb.fields.push_back("name");
+    Field fd1; fd1.fieldLength = 6; fd1.fieldName = "id";
+    fd1.fieldType = FieldType::CHAR; fd1.isPrimeryKey = true; fd1.isUnique = true;
+    Field fd2; fd2.fieldLength = 4; fd1.fieldName = "name";
+    fd1.fieldType = FieldType::CHAR; fd1.isPrimeryKey = false; fd1.isUnique = false;
+    tb.fields.push_back(fd1);
+    tb.fields.push_back(fd2);
     tb.tableName = "test";
     tb.totalLength = -1;
     Block::size = 4*10;
+    BufferManager::status = "DISABLE";
     BufferManager::initBlocks(3);
-    BufferManager bufferManager = BufferManager(tb);
+
+
+    RecordManager recordManager = RecordManager();
+    vector<TableRowPtr> v = recordManager.select(tb);
+    cout << v.size() << endl;
+    for (int i=0; i<v.size(); i++) {
+        cout << v[i]->getValues()[0] << endl;
+        cout << v[i]->getValues()[1] << endl;
+    }
+
+    //vector<string> v = vector<string>();
+    //v.push_back(string("900000new9"));
+    //recordManager.insert(tb, v);
+
+
+    //BufferManager bufferManager = BufferManager(tb);
     //cout << bufferManager.getTailAddr().getOffset() << endl;
-    cout << bufferManager.read(Address("test", 4)) << endl; bufferManager.printBlocks();
+    //cout << bufferManager.read(Address("test", 3)) << endl; bufferManager.printBlocks();
 
+
+    //bufferManager.write(Address("test", 13), string("313000ld13")); bufferManager.printBlocks();
 /*
-    bufferManager.write(Address("test", 4), string("390000ldx9")); bufferManager.printBlocks();
-
     cout << bufferManager.read(Address("test", 4)) << endl; bufferManager.printBlocks();
 
     cout << bufferManager.read(Address("test", 3)) << endl; bufferManager.printBlocks();

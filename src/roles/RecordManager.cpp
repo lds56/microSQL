@@ -5,48 +5,48 @@
 #include<iostream>
 #include<string>
 #include<vector>
-#include <tclDecls.h>
 
 using namespace std;
 
-bool RecordManager::createTable(string tableName) {
-	ofstream file("data/" + tableName + ".table");
+bool RecordManager::createTable(TableInfo tableInfo) {
+	ofstream file("data/" + tableInfo.tableName + ".table");
   	file.close();
+    return true;
 }
 	
-bool RecordManager::dropTable(string tableName) {
-    string fileName = "data/" + tableName + ".table";
+bool RecordManager::dropTable(  TableInfo tableInfo) {
+    string fileName = "data/" + tableInfo.tableName + ".table";
 	int ret_code = remove(fileName.data());
    	if (ret_code == 0) {
 		cout << "File was successfully deleted\n";
+        return false;
 	} else {
 	   	cerr << "Error during the deletion: " << ret_code << '\n';
+        return true;
 	}
 }
 	
-vector<TableRowPtr> RecordManager::select(string tableName) {
-	select(tableName, Condition("true"));
+vector<TableRowPtr> RecordManager::select(TableInfo tableInfo) {
+	return select(tableInfo, Condition("true"));
 }
 	
-	//ensure fields!! 
-	//vector<map<string, string>> select(string tableName, Condition cond) {
-	//	select()
-	//}
-	
-vector<TableRowPtr> RecordManager::select(string tableName, Condition cond) {
-		TablePtr tPtr(new Table(tableName));
+vector<TableRowPtr> RecordManager::select(TableInfo tableInfo, Condition cond) {
+		TablePtr tPtr(new Table(tableInfo));
         vector<TableRowPtr> aVector;
 		TableRowPtr rPtr = tPtr->getHead();
+        //cout << rPtr->getAddr().getOffset() << endl;
 //        TableRowPtr rPtr( new TableRow(tPtr->getHeadAddr(), tPtr->getRowSize()) );
-		do {
+        while (true) {
 			if (cond.check(rPtr) && !rPtr->isBlank()) aVector.push_back(rPtr);
-			rPtr = rPtr->next();
-		} while (!tPtr->isTail(rPtr));
+            //cout << rPtr->getAddr().getOffset() << endl;
+            if (tPtr->isTail(rPtr)) break;
+			rPtr = tPtr->getNext(rPtr);
+		}
 		return aVector;
 }
 	
-bool RecordManager::insert(string tableName, vector<string> data) {
-		TablePtr tPtr(new Table(tableName));
+bool RecordManager::insert(TableInfo tableInfo, vector<string> data) {
+		TablePtr tPtr(new Table(tableInfo));
 		if (tPtr->noBlank()) {
             tPtr->addNewRow(data);  //need validate data in upper level
             TableRowPtr rPtr = tPtr->getTail();
@@ -54,23 +54,25 @@ bool RecordManager::insert(string tableName, vector<string> data) {
 //TableRow tRow = new TableRow(tPtr->getTailAddr(), tPtr->getRowSize());
 		else {
 			TableRowPtr rPtr = tPtr->getBlankRow();
-			rPtr->setBlank(false);
-			rPtr->setData(data);
+            tPtr->fillBlank(rPtr, data);
 		}
+    return true;
 }
 	
-bool RecordManager::del(string tableName) {
-	delete(tableName, Condition("true"));
+bool RecordManager::del(TableInfo tableInfo) {
+	return del(tableInfo, Condition("true"));
 }
 
-bool RecordManager::del(string tableName, Condition cond){
-	TablePtr tPtr(new Table(tableName));
-	TableRowPtr rPtr = tPtr.getHead();
+bool RecordManager::del(TableInfo tableInfo, Condition cond){
+	TablePtr tPtr(new Table(tableInfo));
+	TableRowPtr rPtr = tPtr->getHead();
 //TableRowPtr rPtr( new TableRow(tPtr->getHeadAddr(), tPtr->getRowSize()) );
-	do {
+    while (true) {
 		if (!rPtr->isBlank() && cond.check(rPtr)) {
 			rPtr->setBlank(true);
 		}
-		rPtr = rPtr->next();
-	} while (!tPtr->isTail(rPtr));
+        if (tPtr->isTail(rPtr)) break;
+		rPtr = tPtr->getNext(rPtr);
+	}
+    return true;
 }

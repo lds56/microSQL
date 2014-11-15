@@ -11,19 +11,18 @@ set(SOURCE_FILES
     src/models/Block.cpp
     #src/models/Buffer.h
     #src/models/Index.h
-    #src/models/Table.h
-    #src/models/TableRow.h
-    #src/models/Condition.h
+    src/models/Table.h
+    src/models/TableRow.h
+    src/models/Condition.h
     src/models/TableInfo.h
     src/roles/BufferManager.cpp
     src/roles/BufferManager.h
     #src/roles/CatalogManager.h
     #src/roles/CatalogManager.cpp
     #src/roles/IndexManager.h
-    #src/roles/RecordManager.cpp
-    #src/roles/RecordManager.h
+    src/roles/RecordManager.cpp
+    src/roles/RecordManager.h
     #src/utils/API.h
-    #src/utils/Condition.h
     #src/utils/Interpreter.h
     #src/utils/Request.h
     #src/utils/Response.h

@@ -11,15 +11,15 @@ using namespace std;
 
 class RecordManager {
 public:
-	bool createTable(string tableName);   //create file: *.table
-	bool dropTable(string tableName);  //delete file: *.table
-	vector<TableRowPtr> select(string tableName);
-	vector<TableRowPtr> select(string tableName, Condition cond);
+	bool createTable(TableInfo tableInfo);   //create file: *.table
+	bool dropTable(TableInfo tableInfo);  //delete file: *.table
+	vector<TableRowPtr> select(TableInfo tableInfo);
+	vector<TableRowPtr> select(TableInfo tableInfo, Condition cond);
 //	vector<TableRowPtr> select(vector<Address> addresses);
-	bool insert(string tableName, vector<string> data);
-    bool del(string tableName);
+	bool insert(TableInfo tableInfo, vector<string> data);
+    bool del(TableInfo tableInfo);
     //bool delete(string tableName);
-    bool del(string tableName, Condition cond);
+    bool del(TableInfo tableInfo, Condition cond);
 	//int delete(vector<Address> addresses); 
 };
 

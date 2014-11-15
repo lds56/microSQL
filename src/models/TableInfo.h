@@ -24,7 +24,7 @@ struct TableInfo {
 	int rowSize;	// Block number of table data in the file
 	int fieldNum;	// Number of fields in the table
 	int totalLength;	// Length of one record which equals to sum(fieldLfength)
-	vector<string> fields;  // Vector used to store all field
+	vector<Field> fields;  // Vector used to store all field
 };
 
 

@@ -11,6 +11,7 @@ public:
     Condition(string mask): mask(mask) {}
     bool check(TableRowPtr rPtr) {
         if (mask == "TRUE") return true;
+        else return true;
     }
 
 private:

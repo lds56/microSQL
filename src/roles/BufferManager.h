@@ -8,7 +8,7 @@
 
 class BufferManager {
 public:
-    BufferManager();
+    //BufferManager() {};
     BufferManager(TableInfo tableInfo);
     static void initBlocks(int num);
     Address getHeadAddr();
@@ -19,10 +19,14 @@ public:
     Block& findBlock(Address address, bool readFlag);
 	bool writeToFile(Address address, string data);
     bool writeToFile(Address address, Block block);
+    string readDirectly(Address address);
+    bool writeDirectly(Address address, string data);
 
     void printBlocks();
 
     ~BufferManager();
+
+    static string status;
 
 private:
     static vector<Block> blocks;

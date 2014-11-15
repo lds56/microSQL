@@ -13,7 +13,7 @@ public:
 	string getfileName() { return fileName; }
 	int getOffset() { return offset; }
     Address add(int delta) { return Address(fileName, offset+delta); }
-    bool equalsTo(Address addr) { return (addr.fileName == this-> fileName && addr.offset == this->offset); }
+    bool equalsTo(Address addr) { return (addr.fileName == this->fileName && addr.offset == this->offset); }
 	
 private:
 	string fileName;

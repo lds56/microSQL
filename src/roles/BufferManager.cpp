@@ -10,6 +10,7 @@
 using namespace std;
 
 vector<Block> BufferManager::blocks;
+string BufferManager::status;
 
 BufferManager::BufferManager(TableInfo tableInfo){
     this->tableInfo = tableInfo;
@@ -40,7 +41,7 @@ Address BufferManager::getHeadAddr() {
 }
 
 Address BufferManager::getTailAddr() {
-    return Address(tableInfo.tableName, fileSize/tableInfo.rowSize);
+    return Address(tableInfo.tableName, fileSize/tableInfo.rowSize - 1);
 }
 
 Block& BufferManager::readFromFile(Address address) {
@@ -110,15 +111,36 @@ Block& BufferManager::findBlock(Address address, bool readFlag) { //read?true, f
 }
 
 string BufferManager::read(Address address) {
-    int start = address.getOffset() % howManyRows * tableInfo.rowSize;
-    int len = tableInfo.rowSize;
-    return findBlock(address, true).pickData(start, len);
+    if (status == "DISABLE") return readDirectly(address);
+    else {
+        int start = address.getOffset() % howManyRows * tableInfo.rowSize;
+        int len = tableInfo.rowSize;
+        return findBlock(address, true).pickData(start, len);
+    }
 }
 
 bool BufferManager::write(Address address, string data) {
-    int start = address.getOffset() % howManyRows * tableInfo.rowSize;
-    int len = tableInfo.rowSize;
-    findBlock(address, false).modify(start, len, data);
+    if (status=="DISABLE") writeDirectly(address, data);
+    else {
+        int start = address.getOffset() % howManyRows * tableInfo.rowSize;
+        int len = tableInfo.rowSize;
+        findBlock(address, false).modify(start, len, data);
+    }
+    return true;
+}
+
+string BufferManager::readDirectly(Address address) {
+    char* buffer = new char(tableInfo.rowSize);
+    fseek(fp, address.getOffset()*tableInfo.rowSize, SEEK_SET);
+    fread(buffer, tableInfo.rowSize, 1, fp);
+    string aString = string(buffer);
+    delete[] buffer;
+    return aString;
+}
+
+bool BufferManager::writeDirectly(Address address, string data) {
+    fseek(fp, address.getOffset()*tableInfo.rowSize, SEEK_SET);
+    fwrite(data.c_str(), tableInfo.rowSize, 1, fp);
     return true;
 }
 
