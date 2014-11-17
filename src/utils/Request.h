@@ -14,11 +14,11 @@ public:
 		this->objName = objName;
 	};
 	virtual ~IRequest()=0;
-	virtual ;
 	Action getAction() { return action; } //Action should be enum
 	string getObjName() { return objName; }
 //	void setAction(Action action) { this->action = action; }
 //	void setObjName(String objName) {
+    virtual excute();
 	
 private:
 	Action action;

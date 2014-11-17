@@ -5,5 +5,5 @@ using namespace std;
 
 class Interpreter {
 public:
-    static Request interpret(string command);
+    static Request& interpret(string command);
 };

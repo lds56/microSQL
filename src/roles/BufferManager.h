@@ -11,6 +11,7 @@ public:
     //BufferManager() {};
     BufferManager(TableInfo tableInfo);
     static void initBlocks(int num);
+    void truncate(Address address);
     Address getHeadAddr();
     Address getTailAddr();
 	string read(Address address);

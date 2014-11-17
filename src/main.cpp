@@ -21,27 +21,29 @@ int main() {
     tb.fields.push_back(fd2);
     tb.tableName = "test";
     tb.totalLength = -1;
-    Block::size = 4*10;
-    BufferManager::status = "DISABLE";
+    //Block::size = 4*10;
+    BufferManager::status = "ENABLE";
     BufferManager::initBlocks(3);
+    BufferManager bufferManager = BufferManager(tb);
+    //cout << bufferManager.read(Address("test", 3)) << endl; bufferManager.printBlocks();
+//    Condition cond1 = Condition(Comparison::gt, string("330000"), 0);
+//    Condition cond2 = Condition(Comparison::lt, string("370000"), 0);
+//    vector<Condition> conds = vector<Condition> ();
+//    conds.push_back(cond1); conds.push_back(cond2);
+//    RecordManager recordManager = RecordManager();
+//    recordManager.del(tb, conds);
+//    vector<string> v = vector<string>();
+//    v.push_back(string("990000newx"));//    }
+//    recordManager.insert(tb, v);
+//    vector<string> v2 = vector<string>();
+//    v2.push_back(string("999000Ne2x"));
+//    recordManager.insert(tb, v2);
 
-    Condition cond1 = Condition(Comparison::gt, string("330000"), 0);
-    Condition cond2 = Condition(Comparison::lt, string("370000"), 0);
-    vector<Condition> conds = vector<Condition> ();
-    conds.push_back(cond1); conds.push_back(cond2);
-    RecordManager recordManager = RecordManager();
-    recordManager.del(tb, conds);
-    vector<string> v = vector<string>();
-    v.push_back(string("990000newx"));
-    recordManager.insert(tb, v);
-    vector<string> v2 = vector<string>();
-    v2.push_back(string("999000Ne2x"));
-    recordManager.insert(tb, v2);
 //    cout << v.size() << endl;
 //    for (int i=0; i<v.size(); i++) {
 //        cout << v[i]->getValues()[0] << endl;
 //        cout << v[i]->getValues()[1] << endl;
-//    }
+
 
     //vector<string> v = vector<string>();
     //v.push_back(string("900000new9"));
@@ -54,7 +56,7 @@ int main() {
 
 
     //bufferManager.write(Address("test", 13), string("313000ld13")); bufferManager.printBlocks();
-/*
+
     cout << bufferManager.read(Address("test", 4)) << endl; bufferManager.printBlocks();
 
     cout << bufferManager.read(Address("test", 3)) << endl; bufferManager.printBlocks();
@@ -67,7 +69,9 @@ int main() {
 
     cout << bufferManager.read(Address("test", 3)) << endl; bufferManager.printBlocks();
 
-*/
+    bufferManager.write(Address("test", 12), string("920000ld12")); bufferManager.printBlocks();
+
+
 
     //cout << bufferManager.read(Address("test", 3)) << endl; bufferManager.printBlocks();
 

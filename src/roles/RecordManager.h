@@ -20,6 +20,7 @@ public:
     bool del(TableInfo tableInfo);
     //bool delete(string tableName);
     bool del(TableInfo tableInfo, vector<Condition> conds);
+    void commit();
 	//int delete(vector<Address> addresses); 
 };
 

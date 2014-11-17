@@ -105,3 +105,12 @@ bool RecordManager::del(TableInfo tableInfo, vector<Condition> conds){
 	}
     return true;
 }
+
+void RecordManager::commit() {
+    for (map<TableInfo, queue<TableRowPtr>>::iterator iter=Table::blanksMap.begin(); iter!=Table::blanksMap.end(); ++iter) {
+        TablePtr tPtr = new Table(iter->first);
+        queue<TableRowPtr> & bQueue = iter->second;
+
+        tPtr->notifyTruncate();
+    }
+}

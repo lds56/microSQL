@@ -25,9 +25,9 @@ public:
         //cout << "tail" << tailAddr.getOffset() << endl;
         //cout << "tail" << bufferManager.read(tailAddr) << endl;
 
-        if (blanksMap.count(tableInfo.tableName)==0) {
+        if (blanksMap.count(tableInfo)==0) {
             queue<TableRowPtr> blankQueue = queue<TableRowPtr> ();
-            blanksMap[tableInfo.tableName] = blankQueue;
+            blanksMap[tableInfo] = blankQueue;
             //blanksMap.insert( map<string, queue<TableRowPtr>::value_type(tableInfo.tableName, blankQueue) );
         }
 	}
@@ -44,13 +44,17 @@ public:
         //cout << "mx: " << nextAddr.getOffset() << endl;
         return TableRowPtr( new TableRow(nextAddr, rowSize, byteTo(bufferManager.read( nextAddr ))) );
     }
+    TableRowPtr getPrevious(TableRowPtr rPtr) {
+        Address prevAddr = rPtr->getAddr().add(-1);
+        return TableRowPtr( new TableRow(prevAddr, rowSize, byteTo(bufferManager.read( prevAddr ))) );
+    }
 	bool isTail(TableRowPtr rPtr) {
         return rPtr->getAddr().equalsTo(tailAddr);
     }
-	TableRowPtr getBlankRow() { return blanksMap[tableInfo.tableName].front(); }
-	void popBlank() { blanksMap[tableInfo.tableName].pop(); }
-    void pushBlank(TableRowPtr rPtr) { blanksMap[tableInfo.tableName].push(rPtr); }
-	bool noBlank() { return blanksMap[tableInfo.tableName].empty(); }
+	TableRowPtr getBlankRow() { return blanksMap[tableInfo].front(); }
+	void popBlank() { blanksMap[tableInfo].pop(); }
+    void pushBlank(TableRowPtr rPtr) { blanksMap[tableInfo].push(rPtr); }
+	bool noBlank() { return blanksMap[tableInfo].empty(); }
 	string toByte(vector<string> data) {
 		string rowString = "";
 		for (int i=0; i<data.size(); i++) {
@@ -77,13 +81,13 @@ public:
     void fillBlank(TableRowPtr rPtr, vector<string> data) {
         bufferManager.write(rPtr->getAddr(), toByte(data));
     }
+    static map<TableInfo, queue<TableRowPtr>> blanksMap;
 
 private:
     TableInfo tableInfo;
     BufferManager bufferManager;
 	int rowSize;
     //shared_ptr<queue<TableRowPtr>> blankQueuePtr;
-	static map<string, queue<TableRowPtr>> blanksMap;
 	Address headAddr;
 	Address tailAddr;
 };

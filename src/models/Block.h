@@ -57,12 +57,12 @@ public:
         return data;
     }
 
-    bool contains(Address address, int rowSize) {
+    bool contains(Address address, int rowNum) {
         return (startAddr.getfileName() == address.getfileName() &&
-                startAddr.getOffset() <= address.getOffset() && address.getOffset() < startAddr.getOffset()+rowSize );
+                startAddr.getOffset() <= address.getOffset() && address.getOffset() < startAddr.getOffset()+rowNum );
     }
 
-    static int size;
+    static const int size;
     ~Block() {
         //cout << "delete" << endl;
         //delete[] data;

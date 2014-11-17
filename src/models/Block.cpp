@@ -1,3 +1,3 @@
 #include "models/Block.h"
 
-int Block::size;
+const int Block::size = 40;

@@ -1,7 +1,7 @@
 #include <string>
 #include <cstdio>
 #include <ctime>
-#include <unistd.h>
+#include <memory>
 #include "models/Address.h"
 #include "models/Block.h"
 #include "roles/BufferManager.h"
@@ -45,19 +45,30 @@ Address BufferManager::getTailAddr() {
 }
 
 Block& BufferManager::readFromFile(Address address) {
-    char* buffer = new char(Block::size);
+    char buffer[Block::size+1];
+    memset(buffer, 0, sizeof buffer);
+    //printf("buffer: %d", (int)buffer);
+    //buffer[0] = '\0';
+    cout << "buffer: " << (void*)buffer << endl;
+    cout << string(buffer) << endl;
     //int blockNum = address.getOffset()*tableInfo.rowSize / Block::size;{
     int startOffset = (address.getOffset() / howManyRows * howManyRows);
     Address startAddress = Address(address.getfileName(), startOffset);
     fseek(fp, startOffset*tableInfo.rowSize, SEEK_SET);
+    //cout << "start: " << startOffset << endl;
+    //cout << "fileSize: " << fileSize << endl;
     if (startOffset*tableInfo.rowSize + Block::size > fileSize) {
-        int remainRows = (fileSize - startOffset) / tableInfo.rowSize;
+        int remainRows = (fileSize - startOffset*tableInfo.rowSize) / tableInfo.rowSize;
         //buffer = new char(tableInfo.rowSize * remainRows);
         fread(buffer, tableInfo.rowSize, remainRows, fp);
+        cout << "len: " << strlen(buffer) << endl;
         while (strlen(buffer)<Block::size) strcat(buffer, "0");
+        cout << string(buffer) << endl;
     } else {
         //buffer = new char(tableInfo.rowSize * howManyRows);
         fread(buffer, tableInfo.rowSize, howManyRows, fp);
+        cout << "len: " << strlen(buffer) << endl;
+        cout << string(buffer) << endl;
     }
     //LRU
     clock_t leastUsed = blocks[0].getUsed();
@@ -75,7 +86,9 @@ Block& BufferManager::readFromFile(Address address) {
     }
     blocks[leastIndex] = Block(string(buffer), startAddress);
     //cout << blocks[leastIndex].pickAllData() << endl;
-    delete[] buffer;
+    //delete[] buffer;
+    //buffer = NULL;
+    //cout << "mem: " << string(buffer) << endl;
     return (blocks[leastIndex]);
 }
 
@@ -99,7 +112,7 @@ bool BufferManager::writeToFile(Address address, string data) {
 Block& BufferManager::findBlock(Address address, bool readFlag) { //read?true, false
     int no = -1;
     for (int i=0; i<blocks.size(); i++)
-        if (blocks[i].contains(address, tableInfo.rowSize)) {
+        if (blocks[i].contains(address, howManyRows)) {
             no = i;  //hit
             //if (readFlag && blocks[i].isDirty()) {
             //    writeToFile(address, blocks[i]);
@@ -142,6 +155,10 @@ bool BufferManager::writeDirectly(Address address, string data) {
     fseek(fp, address.getOffset()*tableInfo.rowSize, SEEK_SET);
     fwrite(data.c_str(), tableInfo.rowSize, 1, fp);
     return true;
+}
+
+void BufferManager::truncate(Address address) {
+
 }
 
 void BufferManager::printBlocks() {
