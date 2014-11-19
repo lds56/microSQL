@@ -3,9 +3,11 @@
 
 #include<vector>
 #include<string>
-#include"models/table.h"
-#include"models/Condition.h"
 #include<map>
+#include"models/Condition.h"
+#include"models/TableInfo.h"
+#include"models/TableRow.h"
+#include"models/Table.h"
 
 using namespace std;
 
@@ -20,7 +22,11 @@ public:
     bool del(TableInfo tableInfo);
     //bool delete(string tableName);
     bool del(TableInfo tableInfo, vector<Condition> conds);
+    void registerTable(TableInfo tableInfo);
+    void deregisterTable(TableInfo tableInfo);
     void commit();
+private:
+    vector<TableInfo> tables;
 	//int delete(vector<Address> addresses); 
 };
 

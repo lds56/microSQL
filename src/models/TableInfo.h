@@ -5,27 +5,54 @@
 #include <vector>
 using namespace std;
 
-enum FieldType {
-	INT,
-	CHAR,
-	FLOAT
-};
 
-struct Field {
+class Field {
+public:
 	string fieldName;
-	FieldType fieldType;
+	int fieldType;
 	int fieldLength;
 	bool isPrimeryKey;
 	bool isUnique;
+    Field()
+    {
+        isPrimeryKey=false;
+        isUnique=false;
+    }
+    Field(string n, int t, int l, bool isP, bool isU):
+            fieldName(n), fieldType(t), fieldLength(l), isPrimeryKey(isP), isUnique(isU){}
 };
 
-struct TableInfo {
+class TableInfo {
+public:
 	string tableName;   // Table name
+    int blockNum;
 	int rowSize;	// Block number of table data in the file
 	int fieldNum;	// Number of fields in the table
-	int totalLength;	// Length of one record which equals to sum(fieldLfength)
+	// Length of one record which equals to sum(fieldLfength)
+    void resetRowSize() {
+        rowSize = 0;
+        for (int i=0; i<fields.size(); i++)
+            rowSize += fields[i].fieldLength;
+
+    }
 	vector<Field> fields;  // Vector used to store all field
+    TableInfo(): tableName(""), fieldNum(0), rowSize(0) {}
 };
+
+static bool operator<(const TableInfo& a, const TableInfo& b)
+{
+    return a.tableName < b.tableName;
+}
+
+static bool operator==(const TableInfo& a, const TableInfo& b)
+{
+    return a.tableName == b.tableName;
+}
+
+static bool operator>(const TableInfo& a, const TableInfo& b)
+{
+    return a.tableName > b.tableName;
+}
 
 
 

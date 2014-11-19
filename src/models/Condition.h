@@ -1,7 +1,8 @@
-#ifndef  CONDITION_H_
+#ifndef CONDITION_H_
 #define CONDITION_H_
 
 #include<string>
+#include "Struct.h"
 #include"models/TableRow.h"
 
 using namespace std;
@@ -20,17 +21,10 @@ private:
 };
 */
 
-enum Comparison {
-    gt,   //> value
-    lt,
-    eq,
-    ne,
-    ge,
-    le
-};
 
 class Condition{
 public:
+    Condition(Status st): op(st.op), value(st.value), kthAttri(st.columnNum) {}
     Condition(Comparison op, bool allTrue, string value, int kthAttri):
             op(op), allTrue(allTrue), value(value), kthAttri(kthAttri) {}
     Condition(Comparison op, string value, int kthAttri):
@@ -41,18 +35,16 @@ public:
         if (allTrue) return true;
         else {
             switch (op) {
-                case (Comparison::gt): return (attri > value);
-                case (Comparison::lt): return (attri < value);
-                case (Comparison::eq): return (attri == value);
-                case (Comparison::ne): return (attri != value);
-                case (Comparison::ge): return (attri >= value);
-                case (Comparison::le): return (attri <= value);
+                case (Comparison::Gt): return (attri > value);
+                case (Comparison::Lt): return (attri < value);
+                case (Comparison::Eq): return (attri == value);
+                case (Comparison::Ne): return (attri != value);
+                case (Comparison::Ge): return (attri >= value);
+                case (Comparison::Le): return (attri <= value);
             }
         }
     }
     int getKthAttri() { return kthAttri; }
-
-private:
     Comparison op;
     string value;
     bool allTrue;

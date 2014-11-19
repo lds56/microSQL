@@ -1,8 +1,8 @@
-#include "models/table.h"
 #include <string>
 #include <queue>
 #include <map>
+#include "models/Table.h"
 
 using namespace std;
 
-map<string, queue<TableRowPtr>> Table::blanksMap = map<string, queue<TableRowPtr>>();
+map<TableInfo, queue<TableRowPtr>> Table::blanksMap = map<TableInfo, queue<TableRowPtr>>();

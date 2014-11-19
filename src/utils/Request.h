@@ -13,7 +13,7 @@ public:
 		this->action = action;
 		this->objName = objName;
 	};
-	virtual ~IRequest()=0;
+	virtual ~Request()=0;
 	Action getAction() { return action; } //Action should be enum
 	string getObjName() { return objName; }
 //	void setAction(Action action) { this->action = action; }
@@ -35,6 +35,9 @@ public:
 	}
 	map<string,FieldType> getAttri() { return attri; }
 	string getPrimaryKey() { return primaryKey; }
+    void execute() {
+        API.createTable();
+    }
 
 private:
 	map<string, FieldType> attri;

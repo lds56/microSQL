@@ -1,29 +1,46 @@
-#include "roles/IndexManager.h"
-#include "roles/BTree.h"
+#include "IndexManager.h"
+#include "BTree.h"
 
 
-bool IndexManager::createIndex(Index& indexInfo, string tableName, Field field) {
+void IndexManager::createIndex(Index indexInfo, vector<string> svector, vector<Address> avector) {
+    bTree.create_file(indexInfo);
+	for (int i=0; i<svector.size(); i++){
+		string key=svector[i];
+		int offset=avector[i].getOffset();
+		bTree.insert(key, offset);
+	}
+}
+
+void IndexManager::dropIndex(Index indexInfo) {
 
 }
-bool IndexManager::dropIndex(Index& indexInfo, string tableName, Field field) {
 
+void IndexManager::insert(string key, Address address) {  //primary key
+	int offset=address.getOffset();
+    bTree.insert(key, offset);
 }
-bool IndexManager::select(Index& indexInfo, Condition cond) {
-    string left = cond.getLeft();
-    string right = cond.getRight();
-    vector<Address> addrs = bTree.select(left, right);
+/*
+vector<Address> IndexManager::select(vector<Condition> cond) {
+    bool leftFlag = cond[0].getLeftFlag();
+    bool rightFlag = cond[1].getRightFlag();
+    string left = cond[0].getValue();
+    string right = cond[1].getValue();
+    vector<Address> addrs = bTree.select_between(left, right, leftFlag, rightFlag);
+    return addrs;
 }
-bool IndexManager::del(Index& indexInfo, Condition cond) {
-    string left = cond.getLeft();
-    string right = cond.getRight();
-    bTree.del(left, right);
+
+vector<Address> IndexManager::dele(vector<Condition> cond) {
+    bool leftFlag = cond[0].getLeftFlag();
+    bool rightFlag = cond[1].getRightFlag();
+    string left = cond[0].getValue();
+    string right = cond[1].getValue();
+    vector<Address> addrs= bTree.del(left, right, leftFlag, rightFlag);
+    return addrs;
 }
-bool IndexManager::insert(Index& indexInfo, string key, Address address) {  //primary key
-    bTree.insert(key, address);
-}
+
 bool del(Index& indexInfo, string key) {
     bTree.del(key);
 }
 vector<Address> select(Index& indexInfo, string key) {
     bTree.select(key);
-}
+}*/

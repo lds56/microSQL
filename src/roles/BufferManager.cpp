@@ -2,37 +2,56 @@
 #include <cstdio>
 #include <ctime>
 #include <memory>
-#include "models/Address.h"
-#include "models/Block.h"
+#include <unistd.h>
+#include <sys/types.h>
 #include "roles/BufferManager.h"
-#include "models/TableInfo.h"
 
 using namespace std;
 
 vector<Block> BufferManager::blocks;
+map<TableInfo, int> BufferManager::fileSizes;
 string BufferManager::status;
 
 BufferManager::BufferManager(TableInfo tableInfo){
     this->tableInfo = tableInfo;
-    this->fp = fopen((tableInfo.tableName + ".tb").c_str(), "r+");
-    //char* sss;
+    this->fp = fopen((tableInfo.tableName + ".table").c_str(), "r+");
+    //cout << "open " << tableInfo.tableName + ".table" << endl;
+    if (fp == NULL) cout << "No File Found!" << endl;
+    else cout << "open file successfully!" << endl;
+
+    //char sss[100];
     //getcwd(sss, 100);
     //puts(sss);
+
     fseek(fp, 0, SEEK_END);
-    this->fileSize = ftell(fp);
-    cout << fileSize << endl;
+    if (fileSizes.count(tableInfo) == 0) {
+        fileSize = ftell(fp);
+        fileSizes[tableInfo] = fileSize;
+    }
+    else fileSize = fileSizes[tableInfo];
     this->howManyRows = Block::size/tableInfo.rowSize;
+    //cout << "howManyRows: " <<  howManyRows << endl;
 }
 
 BufferManager::~BufferManager() {
+    fileSizes[tableInfo] = fileSize;
     fseek(fp, 0, SEEK_END);
     fclose(fp);
     //delete fp;
     //int i = 10;
 }
 
-void BufferManager::initBlocks(int num) {
-    for (int i=0; i<num; i++)
+bool BufferManager::isNull() {
+    return (fileSize == 0);
+}
+
+void BufferManager::incFileSize() {
+    fileSize += tableInfo.rowSize;
+    //cout << "size: " << fileSize << endl;
+}
+
+void BufferManager::initBlocks() {
+    for (int i=0; i<Block::number; i++)
         blocks.push_back(Block());
 }
 
@@ -41,6 +60,7 @@ Address BufferManager::getHeadAddr() {
 }
 
 Address BufferManager::getTailAddr() {
+    //cout << "tail: " << fileSize/tableInfo.rowSize - 1 << endl;
     return Address(tableInfo.tableName, fileSize/tableInfo.rowSize - 1);
 }
 
@@ -49,8 +69,8 @@ Block& BufferManager::readFromFile(Address address) {
     memset(buffer, 0, sizeof buffer);
     //printf("buffer: %d", (int)buffer);
     //buffer[0] = '\0';
-    cout << "buffer: " << (void*)buffer << endl;
-    cout << string(buffer) << endl;
+    //cout << "buffer: " << (void*)buffer << endl;
+    //cout << string(buffer) << endl;
     //int blockNum = address.getOffset()*tableInfo.rowSize / Block::size;{
     int startOffset = (address.getOffset() / howManyRows * howManyRows);
     Address startAddress = Address(address.getfileName(), startOffset);
@@ -61,14 +81,12 @@ Block& BufferManager::readFromFile(Address address) {
         int remainRows = (fileSize - startOffset*tableInfo.rowSize) / tableInfo.rowSize;
         //buffer = new char(tableInfo.rowSize * remainRows);
         fread(buffer, tableInfo.rowSize, remainRows, fp);
-        cout << "len: " << strlen(buffer) << endl;
+        //cout << "len: " << strlen(buffer) << endl;
         while (strlen(buffer)<Block::size) strcat(buffer, "0");
-        cout << string(buffer) << endl;
+        //cout << string(buffer) << endl;
     } else {
         //buffer = new char(tableInfo.rowSize * howManyRows);
         fread(buffer, tableInfo.rowSize, howManyRows, fp);
-        cout << "len: " << strlen(buffer) << endl;
-        cout << string(buffer) << endl;
     }
     //LRU
     clock_t leastUsed = blocks[0].getUsed();
@@ -82,7 +100,8 @@ Block& BufferManager::readFromFile(Address address) {
     }
     //cout << "leastindex: " << leastIndex << endl;
     if (blocks[leastIndex].isDirty()) {
-        writeToFile(address, blocks[leastUsed]);
+        //printBlocks();
+        writeToFile(blocks[leastIndex]);
     }
     blocks[leastIndex] = Block(string(buffer), startAddress);
     //cout << blocks[leastIndex].pickAllData() << endl;
@@ -92,18 +111,18 @@ Block& BufferManager::readFromFile(Address address) {
     return (blocks[leastIndex]);
 }
 
-bool BufferManager::writeToFile(Address address, Block block) {
-    //int startOffset = (address.getOffset() / howManyRows * howManyRows);
-    //Address startAddress = Address(address.getfileName(), startOffset);
+bool BufferManager::writeToFile(Block& block) {
+    //cout << "bw: " << block.pickAllData() << endl;
     return writeToFile(block.getStartAddress(), block.pickAllData());
 }
 
 bool BufferManager::writeToFile(Address address, string data) {
     fseek(fp, address.getOffset()*tableInfo.rowSize, SEEK_SET);
-    //cout << data << endl;
+    //cout << "write: " <<  data << endl;
+    //cout << "adr: " << address.getOffset() << endl;
     if (address.getOffset()*tableInfo.rowSize + Block::size > fileSize) {
         int delta = fileSize - address.getOffset()*tableInfo.rowSize;
-        //cout << data.substr(0, delta) << endl;
+       // cout << "delta: " << data.substr(0, delta) << " " << tableInfo.rowSize << endl;
         fwrite(data.substr(0, delta).c_str(), tableInfo.rowSize, (delta)/tableInfo.rowSize, fp);
     } else fwrite(data.c_str(), tableInfo.rowSize, howManyRows, fp);
     return true;
@@ -118,7 +137,7 @@ Block& BufferManager::findBlock(Address address, bool readFlag) { //read?true, f
             //    writeToFile(address, blocks[i]);
             //}
         }
-    cout << no << endl;
+    //cout << no << endl;
     if (no == -1) return readFromFile(address);   //miss
     else return blocks[no];
 }
@@ -143,11 +162,12 @@ bool BufferManager::write(Address address, string data) {
 }
 
 string BufferManager::readDirectly(Address address) {
-    char* buffer = new char(tableInfo.rowSize);
+    char buffer[Block::size+1] ;// = new char(tableInfo.rowSize);
+    memset(buffer, 0, sizeof buffer);
     fseek(fp, address.getOffset()*tableInfo.rowSize, SEEK_SET);
     fread(buffer, tableInfo.rowSize, 1, fp);
     string aString = string(buffer);
-    delete[] buffer;
+    //delete[] buffer;
     return aString;
 }
 
@@ -157,18 +177,34 @@ bool BufferManager::writeDirectly(Address address, string data) {
     return true;
 }
 
-void BufferManager::truncate(Address address) {
+void BufferManager::truncateFrom(Address address) {
+    fflush(fp);
+    int fd = fileno(fp);
+    int size = address.getOffset()*tableInfo.rowSize;
+    //cout << "size: " << size << endl;
+    if (ftruncate(fd, size))
+    {
+        perror("truncate wrong");
+    }
+    rewind(fp);
+}
 
+void BufferManager::cleanupBlocks() {
+    //cout << "-------------" << endl;
+    //printBlocks();
+    for (int i=0; i<Block::number; i++)
+        if (blocks[i].isDirty()) writeToFile(blocks[i]);
 }
 
 void BufferManager::printBlocks() {
     //cout << "print!" << endl;
-    for (int i=0; i<blocks.size(); i++)
+    /*for (int i=0; i<blocks.size(); i++)
         if (blocks[i].getUsed() != 0) {
             cout << i << ": " << blocks[i].getStartAddress().getOffset() << " " ;
             cout << blocks[i].pickAllData() << " " ;
             cout << blocks[i].isDirty() << " ";
             cout << blocks[i].getUsed() << endl;
         }
+        */
 }
 

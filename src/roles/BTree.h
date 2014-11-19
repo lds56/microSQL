@@ -9,7 +9,9 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "models/Index.h"
+#include "struct.h"
+#include <vector>
+#include "models/Address.h"
 #include "models/TableInfo.h"
 
 using namespace std;
@@ -24,25 +26,24 @@ public:
 				lazy[i][j]=0;
 
 	}
-	void delete_file(Index& indexinfo); //drop index
-	void create_file(Index& indexin, TableInfo& tablein); //create index
-	void ReadFromFile(Index& indexin); // use after this
-	void WriteToFile(Index& indexinfo); //close after this
-    void select_qual(string key);
+	//void delete_file(Index& indexinfo); //drop index
+	void create_file(Index indexin); //create index
+	void ReadFromFile(Index indexin); // use after this
+	void WriteToFile(); //close after this
 
-    void del(string s);
-	void insert(string s);
+	vector<Address> del(string left, string right, bool leftFlag, bool rightFlag);
+	void insert(string s, int offset);
 
 	//void create(Index& indexinfo);
-    void select_larger(string s);
-    void select_smaller(string s);
-    void select_between(string low, string high);
-	void search(string s, int bp);
+    vector<Address> select_between(string low, string high, bool leftFlag, bool rightFlag);
+
+    void search(string s, int bp);
 	void l_split();
 	void b_split();
 	void print();
 
 public:
+	Index indexinfo;
 	storage str;
 	int blkn;
 	int bias;

@@ -1,250 +1,138 @@
-#include "roles/CatalogManager.h"
-#include "roles/BufferManager.h"
-#include <iostream>
-using namespace std;
+#include "unistd.h"
+#include "CatalogManager.h"
 
-#define MAX_TABLEINFO_SIZE 10000
-#define MAX_INDEXINFO_SIZE 10000
+CatalogManager::CatalogManager(){
+    chdir("src/data");
+	initTable();
+	initIndex();
+}
 
-void CatalogManager::loadTableCatalog(string tableCatalog) {
-	Address table(tableCatalog, 0);
-	BufferManager buffer;
-	iostream in;
+CatalogManager::~CatalogManager(){
+    //cout << "destruct" << endl;
+	saveTable();
+	saveIndex();
+}
 
-	in << buffer.read(table);
-	in >> tableCount;
-	for(int i = 0; i < tableCount; i++) {
-		TableInfo tempTable;
-		in >> tempTable.tableName;
-		in >> tempTable.blockNum;
-		in >> tempTable.fieldNum;
-		for(int j = 0; j < tempTable.fieldNum; j++) {
-			Field tempField;
-			in >> tempField.fieldName;
-			in >> tempField.fieldType;
-			in >> tempField.fieldLength;
-			in >> tempField.isPrimeryKey;
-			in >> tempField.isUnique;
-			tempTable.fields.push_back(tempField);
-			tempTable.totalLength +=tempField.fieldLength;
-		}
-		tables.push_back(tempTable);
+void CatalogManager::initTable(){
+    //cout << "init" << endl;
+    char sss[100];
+    getcwd(sss, 100);
+    puts(sss);
+	const string filename = "table.catlog";
+	fstream  fin(filename.c_str(), ios::in);
+    //fin >> "hhh" ;
+    //cout << tableCount << endl;
+	fin >> tableCount;
+	for(int i = 0; i < tableCount; i++)
+	{//fill in the vector of tables
+		TableInfo temp_table;
+		fin >> temp_table.tableName;
+		fin >> temp_table.fieldNum;
+		fin >> temp_table.blockNum;
+		for(int j = 0; j < temp_table.fieldNum; j++)
+		{//fill in the vector of temp_table.fields
+			Field temp_attri;
+            //cout << temp_attri.fieldName << endl;
+	 		fin >> temp_attri.fieldName;
+	 		fin >> temp_attri.fieldType;
+	 		fin >> temp_attri.fieldLength;
+	 		fin >> temp_attri.isPrimeryKey;
+	 		fin >> temp_attri.isUnique;
+	 		temp_table.fields.push_back(temp_attri);
+	 		temp_table.rowSize += temp_attri.fieldLength;
+	 	}
+	 	tables.push_back(temp_table);
 	}
+	fin.close();
 }
 
-void CatalogManager::loadIndexCatalog(string indexCatalog) {
-	Address index(indexCatalog, 0);
-	BufferManager buffer;
-	iostream in;
-
-	in << buffer.read(index);
-	in >> indexCount;
-	for(int i = 0; i < indexCatalog; i++) {
-		Index tempIndex;
-		in >> tempIndex.indexName;
-		in >> tempIndex.tableName;
-		in >> tempIndex.fieldName;
-		in >> tempIndex.columnLength;
-		in >> tempIndex.blockNum;
-		indexes.push_back(tempIndex);
+void CatalogManager::initIndex(){
+	const string filename = "index.catlog";
+	fstream  fin(filename.c_str(), ios::in);
+	fin >> indexCount;
+	for(int i = 0; i < indexCount; i++)
+	{//fill in the vector of indexes
+		Index temp_index;
+		fin >> temp_index.indexName;
+		fin >> temp_index.tableName;
+		fin >> temp_index.column;
+		fin >> temp_index.columnLength;
+		fin >> temp_index.blockNum;
+	 	indexes.push_back(temp_index);
 	}
+	fin.close();
 }
 
-void CatalogManager::storeTableCatalog(string tableCatalog) {
-	Address table(tableCatalog, 0);
-	BufferManager buffer;
-	string data;
+void CatalogManager::saveTable(){
+    //cout << "save " << endl;
+	string filename = "table.catlog";
+	fstream  fout(filename.c_str(), ios::out);
 
-	data += tableCount;
-	for(int i = 0; i < tableCount; i++) {
-		iostream out;
-		out << tables[i].tableName << " ";
-		out << tables[i].blockNum << " ";
-		out << tables[i].fieldNum << endl;
-		for(int j = 0; j < tables[i].fieldNum; i++) {
-			out << tables[i].fields[j].fieldName << " ";
-			out << tables[i].fields[j].fieldType << " ";
-			out << tables[i].fields[j].fieldLength << " ";
-			out << tables[i].fields[j].isPrimeryKey << " ";
-			out << tables[i].fields[j].isUnique << endl;
-		}
-		string temp;
-		out >> temp;
-		data = data.insert(1 + i * MAX_TABLEINFO_SIZE, temp);
-	}
-	buffer.write(table, data);
-}
+    //cout << "cout: " << tableCount << endl;
+	fout << tableCount << endl;
+	for(int i = 0; i < tableCount; i++)
+	{
+		fout << tables[i].tableName << " ";
+		fout << tables[i].fieldNum << " ";
+		fout << tables[i].blockNum << endl;
 
-void CatalogManager::storeIndexCatalog(string indexCatalog) {
-	Address index(indexCatalog, 0);
-	BufferManager buffer;
-	string data;
-
-	data += indexCount;
-	for(int i = 0; i << indexCount; i++) {
-		iostream out;
-		out << indexes[i].indexName << " ";
-		out << indexes[i].tableName << " ";
-		out << indexes[i].fieldName << " ";
-		out << indexes[i].columnLength << " ";
-		out << indexes[i].blockNum << endl;
-		string temp;
-		out >> temp;
-		data = data.insert(1 + i * MAX_INDEXINFO_SIZE, temp);
-	}
-	buffer.write(index, data);
-}
-
-CatalogManager::CatalogManager() {
-	loadTableCatalog();
-	loadIndexCatalog();
-}
-
-CatalogManager::~CatalogManager() {
-	storeTableCatalog();
-	storeIndexCatalog();
-}
-
-bool CatalogManager::existsTable(string tableName) {
-	for(int i = 0; i < tableCount; i++) {
-		if(tables[i].tableName == tableName)
-			return true;
-	}
-	return false;
-}
-
-bool CatalogManager::hasIndex(string tableName, string fieldName) {
-	for(int i = 0; i < indexCount; i++) {
-		if(indexes[i].tableName == tableName && indexes[i].fieldName == fieldName)
-			return true;
-	}
-	return false;
-}
-
-bool CatalogManager::hasIndex(string indexName) {
-	for(int i = 0; i < indexCount; i++) {
-		if(indexes[i].indexName == indexName)
-			return true;
-	}
-	return false;
-}
-
-vector<Field> CatalogManager::getFields(string tableName) {
-	vector<Field> emptyFields;
-	for(int i = 0; i < tableCount; i++) {
-		if(tables[i].tableName == tableName)
-			return tables[i].fields;
-	}
-	return emptyFields;
-}
-
-Index CatalogManager::getIndex(string tableName, string fieldName) {
-	Index emptyIndex;
-	for(int i = 0; i < indexCount; i++) {
-		if(indexes[i].tableName == tableName && indexes[i].fieldName == fieldName)
-			return indexes[i];
-	}
-	return emptyIndex;
-}
-
-Index CatalogManager::getIndex(string indexName) {
-	Index emptyIndex;
-	for(int i = 0; i < indexCount; i++) {
-		if(indexes[i].indexName == indexName)
-			return indexes[i];
-	}
-	return emptyIndex;
-}
-
-int CatalogManager::getFieldCount(string tableName) {
-	for(int i = 0; i < tableCount; i++) {
-		if(tables[i].tableName == tableName)
-			return tables[i].fields.size();
-	}
-	return 0;
-}
-
-int CatalogManager::getIndexCount(string tableName) {
-	int cnt = 0;
-	for(int i = 0; i < indexCount; i++) {
-		if(indexes[i].tableName == tableName)
-			cnt++;
-	}
-	return cnt;
-}
-
-int CatalogManager::getRowLength(string tableName) {
-	for(int i = 0; i < tableCount; i++) {
-		if(tables[i].tableName == tableName)
-			return tables[i].totalLength;
-	}
-	return 0;
-}
-
-string CatalogManager::getPrimaryKey(string tableName) {
-	for(int i = 0; i < tableCount; i++) {
-		if(tables[i].tableName == tableName) {
-			for(int j = 0; j < tables[i].fields.size(); j++)
-				if(tables[i].fields[j].isPrimeryKey)
-					return tables[i].fields[j].fieldName;
+		for(int j = 0; j < tables[i].fieldNum; j++)
+		{
+			fout << tables[i].fields[j].fieldName << " ";
+			fout << tables[i].fields[j].fieldType << " ";
+			fout << tables[i].fields[j].fieldLength << " ";
+			fout << tables[i].fields[j].isUnique  << " ";
+			fout << tables[i].fields[j].isPrimeryKey  << endl;
 		}
 	}
-	return "NotFound";
+	fout.close();
 }
 
-bool CatalogManager::isUnique(string tableName, string fieldName) {
-	for(int i = 0; i < tableCount; i++) {
-		if(tables[i].tableName == tableName) {
-			for(int j = 0; j < tables[i].fields.size(); j++)
-				if(tables[i].fields[j].fieldName == fieldName)
-					return tables[i].fields[j].isUnique;
-		}
+void CatalogManager::saveIndex(){
+	string filename = "index.catlog";
+	fstream  fout(filename.c_str(), ios::out);
+	fout << indexCount << endl;
+	for(int i = 0; i < indexCount; i++)
+	{
+		fout << indexes[i].indexName << " ";
+		fout << indexes[i].tableName << " ";
+		fout << indexes[i].column << " ";
+		fout << indexes[i].columnLength << " ";
+		fout << indexes[i].blockNum << endl;
 	}
-	return false;
+	fout.close();
 }
 
-bool CatalogManager::isPrimaryKey(string tableName, string fieldName) {
-	for(int i = 0; i < tableCount; i++) {
-		if(tables[i].tableName == tableName) {
-			for(int j = 0; j < tables[i].fields.size(); j++)
-				if(tables[i].fields[j].fieldName == fieldName)
-					return tables[i].fields[j].isPrimeryKey;
-		}
-	}
-	return false;
-}
-
-void CatalogManager::addTable(TableInfo &table) {
+void CatalogManager::createTable(TableInfo& table){
 	tableCount++;
 	for(int i = 0; i < table.fields.size(); i++){
-		table.totalLength += table.fields[i].fieldLength;
+		table.rowSize += table.fields[i].fieldLength;
 	}
 	tables.push_back(table);
 }
 
-void CatalogManager::deleteTable(string tableName) {
-	for(int i = 0; i < tableCount; i++) {
-		if(tables[i].tableName == tableName) {
+void CatalogManager::createIndex(Index index){
+	indexCount++;
+	indexes.push_back(index);
+}
+
+void CatalogManager::dropTable(string tablename){
+	for(int i = tableCount -1; i >= 0; i--){
+		if(tables[i].tableName == tablename){
 			tables.erase (tables.begin()+i);
 			tableCount--;
-			break;
 		}
 	}
-	for(int i = 0; i < indexCount; i++) {
-		if(indexes[i].tableName == tableName) {
+	for(int i = indexCount - 1; i >= 0; i--){//�?ɾ���ˣ�����������ϵ����е�indexҲҪ����ɾ��
+		if(indexes[i].tableName == tablename){
 			indexes.erase (indexes.begin()+i);
 			indexCount--;
 		}
 	}
 }
 
-void CatalogManager::addIndex(Index &index) {
-	indexCount++;
-	indexes.push_back(index);
-}
-
-void CatalogManager::deleteIndex(string indexName) {
-	for(int i = 0; i < indexCount; i++) {
+void CatalogManager::dropIndex(string indexName){
+	for(int i = indexCount - 1; i >= 0; i--){
 		if(indexes[i].indexName == indexName){
 			indexes.erase (indexes.begin()+i);
 			indexCount--;
@@ -252,31 +140,147 @@ void CatalogManager::deleteIndex(string indexName) {
 	}
 }
 
-TableInfo CatalogManager::getTableInfo(string tableName) {
-	TableInfo emptyTableInfo;
-	for(int i = 0; i < tableCount; i++)
-		if(tables[i].tableName == tableName)
-			return tables[i];
-	return emptyTableInfo;
+void CatalogManager::update(TableInfo& tableinfor){
+	for(int i = 0; i < tableCount; i++){
+		if(tables[i].tableName == tableinfor.tableName){
+			tables[i].fieldNum = tableinfor.fieldNum;
+			tables[i].blockNum = tableinfor.blockNum;
+			tables[i].rowSize = tableinfor.rowSize;
+			tables[i].fields = tableinfor.fields;
+		}
+	}
 }
 
+void CatalogManager::update(Index& index){
+	for(int i = 0; i< indexCount; i++){
+		if(indexes[i].indexName == index.indexName){
+			indexes[i].tableName = index.tableName;
+			indexes[i].column = index.column;
+			indexes[i].blockNum = index.blockNum;
+		}
+	}
+}
 
+bool CatalogManager::existTable(string tablename){
+	int i;
+	for(i=0;i<tables.size();i++){
+		if(tables[i].tableName==tablename)
+			return true;
+	}
+	return false;
+}
 
+bool CatalogManager::existIndex(string tablename, int column){
+	int i;
+	for(i = 0; i < indexes.size(); i++){
+		if(indexes[i].tableName == tablename && indexes[i].column==column)
+			break;//found it
+	}
+	if(i >= indexes.size()) return 0;
+	else return 1;
+}
 
+bool CatalogManager::existIndex(string indexname){
+	int i;
+	for(i = 0; i <indexes.size(); i++){
+		if(indexes[i].indexName == indexname)
+			break;//found it
+	}
+	if(i >= indexes.size()) return 0;
+	else return 1;
+}
 
+TableInfo CatalogManager::getTable(string tablename){
+	int i;
+	TableInfo temp;
+	for(i=0;i<tableCount;i++){
+		if((tables[i].tableName)==tablename){
 
+			return tables[i];
+		}
+	}
+	return temp;
+}
 
+Index CatalogManager::getIndex(string tablename, int column){
+	int i;
+	for(i = 0; i < indexes.size(); i++){
+		if(indexes[i].tableName == tablename && indexes[i].column==column)
+			break;//found it
+	}
+	if(i >= indexCount){
+		Index tmpt;
+		return tmpt;//indicate that table information not found
+	}
+	return indexes[i];
+}
 
+Index CatalogManager::getIndex(string indexName){
+	int i;
+	for(i = 0; i < tableCount; i++){
+		if(indexes[i].indexName == indexName)
+			break;//found it
+	}
+	if(i >= indexCount){
+		Index tmpt;
+		return tmpt;//indicate that table information not found
+	}
+	return indexes[i];
+}
 
+void CatalogManager::display(){
+	displayTable();
+	displayIndex();
+}
 
+void CatalogManager::displayTable(){//this method is for debug only
+	cout << "##    Number of tables:" <<tableCount << endl;
+	for(int i = 0; i < tableCount; i++)
+	{
+		cout << "TABLE " << i << endl;
+		cout << "Table Name: " << tables[i].tableName << endl;
+		cout << "Number of fields: "<< tables[i].fieldNum << endl;
+		cout << "Number of blocks occupied in disk: " << tables[i].blockNum << endl;
+		for(int j = 0; j < tables[i].fieldNum; j++)
+		{
+			cout << tables[i].fields[j].fieldName << "\t";
+			switch(tables[i].fields[j].fieldType)
+			{
+				case CHAR:	cout << "CHAR("<<tables[i].fields[j].fieldLength << ")\t";	break;
+				case INT:	cout << "INT\t";		break;
+				case FLOAT:	cout << "FLOAT\t";	break;
+				default:	cout << "UNKNOW TYPE\t";	break;
+			}
+			if(tables[i].fields[j].isUnique)	cout << "Unique\t";
+			else cout << "NotUnique ";
+			if(tables[i].fields[j].isPrimeryKey) cout << "PrimeryKey\t" << endl;
+			else cout << endl;
+	 	}
+	}
+}
 
+void CatalogManager::displayIndex(){//this method is for debug also
+	cout << "##    Number of indexes:" <<indexCount << endl;
+	for(int i = 0; i < indexCount; i++)
+	{
+		cout << "INDEX " << i << endl;
+		cout << "Index Name: " << indexes[i].indexName << endl;
+		cout << "Table Name: "<< indexes[i].tableName << endl;
+		cout << "Column Number: " << indexes[i].column << endl;
+		cout << "Column Number of blocks occupied in disk: " << indexes[i].blockNum << endl;
+	}
+}
 
+int CatalogManager::getColNum(TableInfo& tableinfo,string columnname)
+{
+	for(int i=0;i<tableinfo.fields.size();i++){
+		if(tableinfo.fields[i].fieldName==columnname){
+			return i;
+		}
+	}
+	return -1;
+}
 
-
-
-
-
-
-
-
-
+int CatalogManager::getColAmo(TableInfo& tableinfo){
+	return tableinfo.fields.size();
+}

@@ -5,6 +5,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 include_directories(src)
 
+#configure_file(data ${CMAKE_CURRENT_BINARY_DIR}/data COPYONLY)
 
 set(SOURCE_FILES
     src/models/Address.h
@@ -23,8 +24,8 @@ set(SOURCE_FILES
     #src/roles/BTree.h
     src/roles/BufferManager.cpp
     src/roles/BufferManager.h
-    #src/roles/CatalogManager.h
-    #src/roles/CatalogManager.cpp
+    src/roles/CatalogManager.h
+    src/roles/CatalogManager.cpp
     #src/roles/IndexManager.h
     #src/roles/IndexManager.cpp
     src/roles/RecordManager.cpp
@@ -33,12 +34,20 @@ set(SOURCE_FILES
     #src/utils/Interpreter.h
     #src/utils/Request.h
     #src/utils/Response.h
-    src/main.cpp
+    #src/main.cpp
+    src/mmain.cpp
+    src/API.cpp
+    src/API.h
+    src/Interpret.cpp
+    src/Interpret.h
+    src/Macro.h
+    src/Struct.h
     #src/microSQL.cpp
     #src/test.cpp
     #src/B+tree.cpp
-    test.tb
-    test.index
+    #src/data/test.tb
+    #test.tb
+    #test.index
     README.md)
 
 add_executable(microSQL ${SOURCE_FILES})

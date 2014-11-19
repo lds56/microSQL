@@ -63,6 +63,7 @@ public:
     }
 
     static const int size;
+    static const int number;
     ~Block() {
         //cout << "delete" << endl;
         //delete[] data;
